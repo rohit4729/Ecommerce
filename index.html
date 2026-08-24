@@ -521,7 +521,7 @@
         
         // IMPORTANT: Initialize EmailJS with your PUBLIC KEY
         // You can get this by creating a free account at https://www.emailjs.com/
-        emailjs.init("YOUR_PUBLIC_KEY_HERE"); 
+        emailjs.init("LrSeDbSgWqgNuZ0jT"); 
 
         function sendOrder(e) {
             e.preventDefault();
@@ -558,7 +558,7 @@
 
             // REPLACE "YOUR_SERVICE_ID" and "YOUR_TEMPLATE_ID" 
             // with the actual IDs from your EmailJS dashboard.
-            emailjs.send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams)
+            emailjs.send("service_l2we1us", "template_9zevt5k", templateParams)
                 .then(function(response) {
                     alert("Order sent successfully! We will contact you soon.");
                     cart = []; // Clear Cart
