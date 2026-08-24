@@ -534,10 +534,11 @@
 
             const name = document.getElementById('customer-name').value;
             const phone = document.getElementById('customer-phone').value;
+            const address = document.getElementById('customer-address').value;
             const btn = document.getElementById('submit-btn');
 
             // Format cart into readable text for the email
-            let orderText = `New Order from ${name} (Phone: ${phone})\n\nItems Ordered:\n`;
+            let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\n\nItems Ordered:\n`;
             let total = 0;
             
             cart.forEach(item => {
