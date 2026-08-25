@@ -416,11 +416,11 @@
         // 1. PRODUCT DATA (You can edit prices here)
         // ==========================================
         const products = [
-            { id: 1, name: "Apple AirPods", price: 999, image: "https://i.ibb.co/XZbXqqSY/Airpod.jpg" },
-            { id: 2, name: "OPPO Smartphone", price: 25000, image: "https://i.ibb.co/W4QTny9B/OPPO-Phone.jpg" },
-            { id: 3, name: "Premium Pen", price: 99, image: "https://i.ibb.co/LDp6JNsx/pen.jpg" },
-            { id: 4, name: "Stylish Spectacles", price: 1700, image: "https://i.ibb.co/rKDF4rqC/Spectical.jpg" },
-            { id: 5, name: "Spectacles with Case", price: 2000, image: "https://i.ibb.co/B5cRZ467/Spectical-With-Case.jpg" }
+            { id: 1, name: "Oppo Enco Air2i", price: 999, image: "https://i.ibb.co/XZbXqqSY/Airpod.jpg", desc: "1 year Manufacturer Warranty, Wireless, rhythmic bass, Dolby Atmos " },
+            { id: 2, name: "OPPO Smartphone", price: 25000, image: "https://i.ibb.co/W4QTny9B/OPPO-Phone.jpg", desc: "Oppo F27 Pro+ 5G, Circular Cosmos Ring camera module, 8Gb Ram, 128Gb Storage"  },
+            { id: 3, name: "Premium Pen (Elkos Colours)", price: 99, image: "https://i.ibb.co/LDp6JNsx/pen.jpg", desc: "Smooth writing, Plastic body, Blue Ink" },
+            { id: 4, name: "Stylish Spectacles (Lenskart Blu)", price: 1700, image: "https://i.ibb.co/rKDF4rqC/Spectical.jpg", desc: "Blue-cut lenses, light-weight frame " },
+            { id: 5, name: "Spectacles with Case (Wayfarer Eyeglasses)", price: 2000, image: "https://i.ibb.co/B5cRZ467/Spectical-With-Case.jpg", desc: "Anti-glare, Premium hard case included" }
         ];
 
         let cart = [];
@@ -438,6 +438,7 @@
                 <div class="product-info">
                     <h3>${product.name}</h3>
                     <p class="product-price">₹${product.price}</p>
+                    <p style="font-size: 0.85rem; color: var(--text-light); margin-bottom: 1rem;">${product.desc}</p>
                     <button class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
                 </div>
             `;
