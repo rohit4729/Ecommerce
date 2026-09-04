@@ -11,6 +11,8 @@
     <!-- EmailJS Script -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     
+    <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore-compat.js"></script>
     <style>
         :root {
             --primary: #2563eb;
@@ -412,6 +414,21 @@
 
     <!-- Javascript -->
     <script>
+
+    // Your web app's Firebase configuration
+const firebaseConfig = {
+  apiKey: "AIzaSyDZqKpIPtARoX6xLZtbTRVRWn-GblEyWKg",
+  authDomain: "thelocalshop-db-7de5b.firebaseapp.com",
+  projectId: "thelocalshop-db-7de5b",
+  storageBucket: "thelocalshop-db-7de5b.firebasestorage.app",
+  messagingSenderId: "296983976077",
+  appId: "1:296983976077:web:94a0b6c53e9f9082ef2ac4"
+};
+
+// Initialize Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
         // ==========================================
         // 1. PRODUCT DATA (You can edit prices here)
         // ==========================================
@@ -424,7 +441,23 @@
         ];
 
         let cart = [];
-
+// 2. REAL-TIME STOCK SYNC (डेटाबेस से लाइव स्टॉक पढ़ना)
+db.collection("products").onSnapshot((querySnapshot) => {
+    querySnapshot.forEach((doc) => {
+        const productId = parseInt(doc.id); // Firebase का ID (1, 2, 3...)
+        const realStock = doc.data().stock; // Firebase से स्टॉक
+        
+        // अपने लोकल products ऐरे में स्टॉक अपडेट करें
+        const product = products.find(p => p.id === productId);
+        if (product) {
+            product.stock = realStock;
+        }
+    });
+    // डेटाबेस से नया स्टॉक आने के बाद स्क्रीन अपडेट करें
+    if (typeof updateStockUI === "function") {
+        updateStockUI();
+    }
+});
         // ==========================================
         // 2. RENDER PRODUCTS TO CAROUSEL
         // ==========================================
@@ -613,6 +646,20 @@ function addToCart(productId) {
             emailjs.send("service_l2we1us", "template_9zevt5k", templateParams)
                 .then(function(response) {
                     alert("Order sent successfully! We will contact you soon.");
+        // --- नया कोड: Firebase में स्टॉक घटाएं ---
+        cart.forEach(item => {
+            db.collection("products").doc(item.id.toString()).update({
+                // जितना क्वांटिटी ख़रीदा है, उतना स्टॉक में से माइनस कर दें
+                stock: firebase.firestore.FieldValue.increment(-item.quantity)
+            });
+        });
+        // -----------------------------------------
+
+        cart = []; // Clear Cart
+        updateCartUI();
+        updateStockUI();
+        toggleCart();
+        document.getElementById('order-form').reset();
                     cart = []; // Clear Cart
                     updateCartUI();
                     updateStockUI();
