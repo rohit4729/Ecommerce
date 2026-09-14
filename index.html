@@ -358,6 +358,12 @@
         <a href="#products" class="btn">Shop Now</a>
     </header>
 
+<!-- Delivery PIN Display Box (यह तब तक छिपा रहेगा जब तक आर्डर ना हो) -->
+<div id="pin-display-box" style="display: none; background-color: #fef08a;      padding: 10px; text-align: center; font-weight: bold; color: #854d0e; margin: 15px auto; max-width: 800px; border-radius: 5px; border: 1px solid #eab308;">
+    🚚 Your Delivery PINs: <span id="saved-pin-value" style="font-size: 1.2rem;"></span>
+    <p style="font-size: 0.8rem; margin: 5px 0 0 0; color: #a16207;">Please share this with the delivery boy.</p>
+</div>
+
     <!-- Products Section -->
     <section id="products" class="products-section">
         <h2 class="section-title">Our Products</h2>
@@ -525,6 +531,7 @@
         // You can get this by creating a free account at https://www.emailjs.com/
         emailjs.init("LrSeDbSgWqgNuZ0jT"); 
 
+
         function sendOrder(e) {
             e.preventDefault();
             
@@ -537,6 +544,24 @@
             const phone = document.getElementById('customer-phone').value;
             const address = document.getElementById('customer-address').value;
             const btn = document.getElementById('submit-btn');
+
+// --- 4-डिजिट का रैंडम डिलीवरी पिन बनाएँ ---
+const deliveryPin = Math.floor(1000 + Math.random() * 9000);
+
+// --- नया कोड: Array में अधिकतम 10 PINs सेव करें ---
+// 1. मेमोरी से पुरानी लिस्ट निकालें (अगर नहीं है तो खाली लिस्ट लें)
+let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
+
+// 2. नया PIN उस लिस्ट में जोड़ दें
+savedPins.push(deliveryPin);
+
+// 3. लिमिट चेक करें: अगर लिस्ट में 10 से ज्यादा PIN हो जाएं, तो सबसे पुराना डिलीट कर दें
+if (savedPins.length > 10) {
+    savedPins.shift(); // .shift() लिस्ट के सबसे पहले (सबसे पुराने) आइटम को अपने आप हटा देता है
+}
+
+// 4. पूरी लिस्ट को वापस मेमोरी में सेव कर दें
+localStorage.setItem("localShopPins", JSON.stringify(savedPins));
 
             // Format cart into readable text for the email
             let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\n\nItems Ordered:\n`;
@@ -565,6 +590,7 @@
                 .then(function(response) {
                     alert("Order sent successfully! We will contact you soon.");
                     cart = []; // Clear Cart
+                    checkAndDisplayPin();
                     updateCartUI();
                     toggleCart();
                     document.getElementById('order-form').reset();
@@ -577,6 +603,28 @@
                     btn.disabled = false;
                 });
         }
+
+        // --- अपडेटेड फंक्शन: सेव किए हुए सारे PINs स्क्रीन पर दिखाएं ---
+function checkAndDisplayPin() {
+    // मेमोरी से लिस्ट निकालें
+    let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
+    const pinBox = document.getElementById("pin-display-box");
+    const pinValueSpan = document.getElementById("saved-pin-value");
+
+    if (savedPins.length > 0) {
+        // लिस्ट के सारे PINs को कॉमा (,) से जोड़ कर दिखाएं (जैसे: 4829, 1256)
+        pinValueSpan.innerText = savedPins.join(", ");
+        pinBox.style.display = "block";
+    } else {
+        pinBox.style.display = "none";
+    }
+}
+
+window.addEventListener('load', function() {
+    if (typeof checkAndDisplayPin === "function") {
+        checkAndDisplayPin();
+    }
+});
     </script>
 </body>
 </html>
