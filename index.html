@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -10,7 +11,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
     <!-- EmailJS Script -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-    
+
     <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore-compat.js"></script>
     <style>
@@ -108,6 +109,7 @@
         .carousel-container::-webkit-scrollbar {
             height: 8px;
         }
+
         .carousel-container::-webkit-scrollbar-thumb {
             background: #cbd5e1;
             border-radius: 4px;
@@ -118,7 +120,7 @@
             background: white;
             border-radius: 12px;
             padding: 1rem;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
             scroll-snap-align: start;
             display: flex;
             flex-direction: column;
@@ -231,7 +233,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0, 0, 0, 0.5);
             opacity: 0;
             visibility: hidden;
             transition: 0.3s;
@@ -251,7 +253,7 @@
             max-width: 400px;
             height: 100%;
             background: white;
-            box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+            box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
             transition: right 0.4s ease;
             z-index: 1002;
             display: flex;
@@ -346,11 +348,17 @@
 
         /* Responsive */
         @media (max-width: 480px) {
-            .hero h1 { font-size: 2.2rem; }
-            .product-card { min-width: 240px; }
+            .hero h1 {
+                font-size: 2.2rem;
+            }
+
+            .product-card {
+                min-width: 240px;
+            }
         }
     </style>
 </head>
+
 <body>
 
     <!-- Hero Section -->
@@ -360,16 +368,17 @@
         <a href="#products" class="btn">Shop Now</a>
     </header>
 
-<!-- Delivery PIN Display Box (यह तब तक छिपा रहेगा जब तक आर्डर ना हो) -->
-<div id="pin-display-box" style="display: none; background-color: #fef08a;      padding: 10px; text-align: center; font-weight: bold; color: #854d0e; margin: 15px auto; max-width: 800px; border-radius: 5px; border: 1px solid #eab308;">
-    🚚 Your Delivery PINs: <span id="saved-pin-value" style="font-size: 1.2rem;"></span>
-    <p style="font-size: 0.8rem; margin: 5px 0 0 0; color: #a16207;">Please share this with the delivery boy.</p>
-</div>
+    <!-- Delivery PIN Display Box (यह तब तक छिपा रहेगा जब तक आर्डर ना हो) -->
+    <div id="pin-display-box"
+        style="display: none; background-color: #fef08a;      padding: 10px; text-align: center; font-weight: bold; color: #854d0e; margin: 15px auto; max-width: 800px; border-radius: 5px; border: 1px solid #eab308;">
+        🚚 Your Delivery PINs: <span id="saved-pin-value" style="font-size: 1.2rem;"></span>
+        <p style="font-size: 0.8rem; margin: 5px 0 0 0; color: #a16207;">Please share this with the delivery boy.</p>
+    </div>
 
     <!-- Products Section -->
     <section id="products" class="products-section">
         <h2 class="section-title">Our Products</h2>
-        
+
         <!-- Product Carousel -->
         <div class="carousel-container" id="carousel">
             <!-- Products injected here via JavaScript -->
@@ -395,7 +404,7 @@
             <h2>Your Cart</h2>
             <button class="close-cart" onclick="toggleCart()"><i class="fas fa-times"></i></button>
         </div>
-        
+
         <div class="cart-items" id="cart-items">
             <!-- Cart Items injected via JS -->
             <p style="text-align:center; color:#64748b; margin-top: 2rem;">Your cart is empty.</p>
@@ -406,7 +415,7 @@
                 <span>Total:</span>
                 <span id="cart-total-price">₹0</span>
             </div>
-            
+
             <form class="order-form" id="order-form" onsubmit="sendOrder(event)">
                 <input type="text" id="customer-name" placeholder="Your Full Name" required>
                 <input type="tel" id="customer-phone" placeholder="Your Phone Number" required>
@@ -421,19 +430,19 @@
     <!-- Javascript -->
     <script>
 
-    // Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyDZqKpIPtARoX6xLZtbTRVRWn-GblEyWKg",
-  authDomain: "thelocalshop-db-7de5b.firebaseapp.com",
-  projectId: "thelocalshop-db-7de5b",
-  storageBucket: "thelocalshop-db-7de5b.firebasestorage.app",
-  messagingSenderId: "296983976077",
-  appId: "1:296983976077:web:94a0b6c53e9f9082ef2ac4"
-};
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDZqKpIPtARoX6xLZtbTRVRWn-GblEyWKg",
+            authDomain: "thelocalshop-db-7de5b.firebaseapp.com",
+            projectId: "thelocalshop-db-7de5b",
+            storageBucket: "thelocalshop-db-7de5b.firebasestorage.app",
+            messagingSenderId: "296983976077",
+            appId: "1:296983976077:web:94a0b6c53e9f9082ef2ac4"
+        };
 
-// Initialize Firebase
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
 
         // ==========================================
         // 1. PRODUCT DATA (You can edit prices here)
@@ -447,32 +456,32 @@ const db = firebase.firestore();
         ];
 
         let cart = [];
-// 2. REAL-TIME STOCK SYNC (डेटाबेस से लाइव स्टॉक पढ़ना)
-db.collection("products").onSnapshot((querySnapshot) => {
-    querySnapshot.forEach((doc) => {
-        const productId = parseInt(doc.id); // Firebase का ID (1, 2, 3...)
-        const realStock = doc.data().stock; // Firebase से स्टॉक
-        
-        // अपने लोकल products ऐरे में स्टॉक अपडेट करें
-        const product = products.find(p => p.id === productId);
-        if (product) {
-            product.stock = realStock;
-        }
-    });
-    // डेटाबेस से नया स्टॉक आने के बाद स्क्रीन अपडेट करें
-    if (typeof updateStockUI === "function") {
-        updateStockUI();
-    }
-});
+        // 2. REAL-TIME STOCK SYNC (डेटाबेस से लाइव स्टॉक पढ़ना)
+        db.collection("products").onSnapshot((querySnapshot) => {
+            querySnapshot.forEach((doc) => {
+                const productId = parseInt(doc.id); // Firebase का ID (1, 2, 3...)
+                const realStock = doc.data().stock; // Firebase से स्टॉक
+
+                // अपने लोकल products ऐरे में स्टॉक अपडेट करें
+                const product = products.find(p => p.id === productId);
+                if (product) {
+                    product.stock = realStock;
+                }
+            });
+            // डेटाबेस से नया स्टॉक आने के बाद स्क्रीन अपडेट करें
+            if (typeof updateStockUI === "function") {
+                updateStockUI();
+            }
+        });
         // ==========================================
         // 2. RENDER PRODUCTS TO CAROUSEL
         // ==========================================
         const carousel = document.getElementById('carousel');
-        
-products.forEach(product => {
-    const card = document.createElement('div');
-    card.className = 'product-card';
-    card.innerHTML = `
+
+        products.forEach(product => {
+            const card = document.createElement('div');
+            card.className = 'product-card';
+            card.innerHTML = `
         <img src="${product.image}" alt="${product.name}">
         <div class="product-info">
             <h3>${product.name}</h3>
@@ -486,75 +495,75 @@ products.forEach(product => {
             <button id="btn-${product.id}" class="add-to-cart-btn" onclick="addToCart(${product.id})">Add to Cart</button>
         </div>
     `;
-    carousel.appendChild(card);
-});
+            carousel.appendChild(card);
+        });
 
         // ==========================================
         // 3. CART LOGIC
         // ==========================================
-       
+
         // स्टॉक अपडेट करने का नया फंक्शन
-function updateStockUI() {
-    products.forEach(product => {
-        const cartItem = cart.find(item => item.id === product.id);
-        const cartQty = cartItem ? cartItem.quantity : 0;
-        const remainingStock = product.stock - cartQty;
+        function updateStockUI() {
+            products.forEach(product => {
+                const cartItem = cart.find(item => item.id === product.id);
+                const cartQty = cartItem ? cartItem.quantity : 0;
+                const remainingStock = product.stock - cartQty;
 
-        const stockTextEl = document.getElementById(`stock-text-${product.id}`);
-        const btnEl = document.getElementById(`btn-${product.id}`);
+                const stockTextEl = document.getElementById(`stock-text-${product.id}`);
+                const btnEl = document.getElementById(`btn-${product.id}`);
 
-        if (remainingStock > 0) {
-            stockTextEl.innerHTML = "Available Products: 1+";
-            stockTextEl.style.color = "green";
-            btnEl.disabled = false;
-            btnEl.style.cursor = "pointer";
-        } else {
-            stockTextEl.innerHTML = "Currently Unavailable: Out of Stock";
-            stockTextEl.style.color = "red";
-            btnEl.innerHTML = "Out of Stock";
-            btnEl.style.background = "#94a3b8";
-            btnEl.style.cursor = "not-allowed";
-            btnEl.disabled = true;
+                if (remainingStock > 0) {
+                    stockTextEl.innerHTML = "Available Products: 1+";
+                    stockTextEl.style.color = "green";
+                    btnEl.disabled = false;
+                    btnEl.style.cursor = "pointer";
+                } else {
+                    stockTextEl.innerHTML = "Currently Unavailable: Out of Stock";
+                    stockTextEl.style.color = "red";
+                    btnEl.innerHTML = "Out of Stock";
+                    btnEl.style.background = "#94a3b8";
+                    btnEl.style.cursor = "not-allowed";
+                    btnEl.disabled = true;
+                }
+            });
         }
-    });
-}
 
-// आपका अपडेटेड Add To Cart फंक्शन
-function addToCart(productId) {
-    const product = products.find(p => p.id === productId);
-    const existingItem = cart.find(item => item.id === productId);
-    
-    // चेक करें कि कार्ट में पहले से कितनी क्वांटिटी है
-    const currentQty = existingItem ? existingItem.quantity : 0;
+        // आपका अपडेटेड Add To Cart फंक्शन
+        function addToCart(productId) {
+            const product = products.find(p => p.id === productId);
+            const existingItem = cart.find(item => item.id === productId);
 
-    // अगर स्टॉक खत्म हो गया है तो ऐड नहीं होगा
-    if (currentQty >= product.stock) {
-        alert("Sorry, this item is out of stock!");
-        return;
-    }
+            // चेक करें कि कार्ट में पहले से कितनी क्वांटिटी है
+            const currentQty = existingItem ? existingItem.quantity : 0;
 
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({ ...product, quantity: 1 });
-    }
-    
-    updateCartUI();
-    updateStockUI(); // स्टॉक का टेक्स्ट अपडेट करने के लिए कॉल करें
-    
-    // विज़ुअल फीडबैक (बटन का कलर बदलना)
-    const btn = event.target;
-    btn.innerHTML = "Added! ✓";
-    btn.style.background = "var(--whatsapp)";
-    setTimeout(() => {
-        // सिर्फ तब वापस 'Add to Cart' करें जब स्टॉक बचा हो
-        const checkItem = cart.find(item => item.id === productId);
-        if (product.stock - checkItem.quantity > 0) {
-            btn.innerHTML = "Add to Cart";
-            btn.style.background = "var(--text-dark)";
+            // अगर स्टॉक खत्म हो गया है तो ऐड नहीं होगा
+            if (currentQty >= product.stock) {
+                alert("Sorry, this item is out of stock!");
+                return;
+            }
+
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ ...product, quantity: 1 });
+            }
+
+            updateCartUI();
+            updateStockUI(); // स्टॉक का टेक्स्ट अपडेट करने के लिए कॉल करें
+
+            // विज़ुअल फीडबैक (बटन का कलर बदलना)
+            const btn = event.target;
+            btn.innerHTML = "Added! ✓";
+            btn.style.background = "var(--whatsapp)";
+            setTimeout(() => {
+                // सिर्फ तब वापस 'Add to Cart' करें जब स्टॉक बचा हो
+                const checkItem = cart.find(item => item.id === productId);
+                if (product.stock - checkItem.quantity > 0) {
+                    btn.innerHTML = "Add to Cart";
+                    btn.style.background = "var(--text-dark)";
+                }
+            }, 1000);
         }
-    }, 1000);
-}
 
         function updateCartUI() {
             const cartItemsContainer = document.getElementById('cart-items');
@@ -608,15 +617,15 @@ function addToCart(productId) {
         // ==========================================
         // 4. EMAILJS INTEGRATION (SEND ORDER)
         // ==========================================
-        
+
         // IMPORTANT: Initialize EmailJS with your PUBLIC KEY
         // You can get this by creating a free account at https://www.emailjs.com/
-        emailjs.init("LrSeDbSgWqgNuZ0jT"); 
+        emailjs.init("LrSeDbSgWqgNuZ0jT");
 
 
         function sendOrder(e) {
-            e.preventDefault(); 
-            
+            e.preventDefault();
+
             if (cart.length === 0) {
                 alert("Please add items to your cart first!");
                 return;
@@ -627,28 +636,28 @@ function addToCart(productId) {
             const address = document.getElementById('customer-address').value;
             const btn = document.getElementById('submit-btn');
 
-// --- 4-डिजिट का रैंडम डिलीवरी पिन बनाएँ ---
-const deliveryPin = Math.floor(1000 + Math.random() * 9000);
+            // --- 4-डिजिट का रैंडम डिलीवरी पिन बनाएँ ---
+            const deliveryPin = Math.floor(1000 + Math.random() * 9000);
 
-// --- नया कोड: Array में अधिकतम 10 PINs सेव करें ---
-// 1. मेमोरी से पुरानी लिस्ट निकालें (अगर नहीं है तो खाली लिस्ट लें)
-let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
+            // --- नया कोड: Array में अधिकतम 10 PINs सेव करें ---
+            // 1. मेमोरी से पुरानी लिस्ट निकालें (अगर नहीं है तो खाली लिस्ट लें)
+            let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
 
-// 2. नया PIN उस लिस्ट में जोड़ दें
-savedPins.push(deliveryPin);
+            // 2. नया PIN उस लिस्ट में जोड़ दें
+            savedPins.push(deliveryPin);
 
-// 3. लिमिट चेक करें: अगर लिस्ट में 10 से ज्यादा PIN हो जाएं, तो सबसे पुराना डिलीट कर दें
-if (savedPins.length > 10) {
-    savedPins.shift(); // .shift() लिस्ट के सबसे पहले (सबसे पुराने) आइटम को अपने आप हटा देता है
-}
+            // 3. लिमिट चेक करें: अगर लिस्ट में 10 से ज्यादा PIN हो जाएं, तो सबसे पुराना डिलीट कर दें
+            if (savedPins.length > 10) {
+                savedPins.shift(); // .shift() लिस्ट के सबसे पहले (सबसे पुराने) आइटम को अपने आप हटा देता है
+            }
 
-// 4. पूरी लिस्ट को वापस मेमोरी में सेव कर दें
-localStorage.setItem("localShopPins", JSON.stringify(savedPins));
+            // 4. पूरी लिस्ट को वापस मेमोरी में सेव कर दें
+            localStorage.setItem("localShopPins", JSON.stringify(savedPins));
 
             // Format cart into readable text for the email
             let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\n\nItems Ordered:\n`;
             let total = 0;
-            
+
             cart.forEach(item => {
                 orderText += `- ${item.name} | Qty: ${item.quantity} | Price: ₹${item.price * item.quantity}\n`;
                 total += (item.price * item.quantity);
@@ -669,22 +678,30 @@ localStorage.setItem("localShopPins", JSON.stringify(savedPins));
             // REPLACE "YOUR_SERVICE_ID" and "YOUR_TEMPLATE_ID" 
             // with the actual IDs from your EmailJS dashboard.
             emailjs.send("service_l2we1us", "template_9zevt5k", templateParams)
-                .then(function(response) {
+                .then(function (response) {
                     alert("Order sent successfully! We will contact you soon.");
-        // --- नया कोड: Firebase में स्टॉक घटाएं ---
-        cart.forEach(item => {
-            db.collection("products").doc(item.id.toString()).update({
-                // जितना क्वांटिटी ख़रीदा है, उतना स्टॉक में से माइनस कर दें
-                stock: firebase.firestore.FieldValue.increment(-item.quantity)
-            });
-        });
-        // -----------------------------------------
-
-        cart = []; // Clear Cart
-        updateCartUI();
-        updateStockUI();
-        toggleCart();
-        document.getElementById('order-form').reset();
+                    // --- नया कोड: Firebase में स्टॉक घटाएं ---
+                    cart.forEach(item => {
+                        db.collection("products").doc(item.id.toString()).update({
+                            // जितना क्वांटिटी ख़रीदा है, उतना स्टॉक में से माइनस कर दें
+                            stock: firebase.firestore.FieldValue.increment(-item.quantity)
+                        });
+                    });
+                    // -----------------------------------------
+                    // 2. Firebase में पूरा आर्डर और पिन सेव करें
+                    db.collection("orders").add({
+                        customerName: name,
+                        customerPhone: phone,
+                        deliveryAddress: address,
+                        secretPin: deliveryPin,
+                        orderItems: cart,
+                        orderDate: new Date().toLocaleString()
+                    });
+                    cart = []; // Clear Cart
+                    updateCartUI();
+                    updateStockUI();
+                    toggleCart();
+                    document.getElementById('order-form').reset();
                     cart = []; // Clear Cart
                     checkAndDisplayPin();
                     updateCartUI();
@@ -693,7 +710,7 @@ localStorage.setItem("localShopPins", JSON.stringify(savedPins));
                     document.getElementById('order-form').reset();
                     btn.innerHTML = '<i class="fas fa-envelope"></i> Send Order via Email';
                     btn.disabled = false;
-                }, function(error) {
+                }, function (error) {
                     alert("Failed to send order. Please try again or contact via WhatsApp.");
                     console.log('FAILED...', error);
                     btn.innerHTML = '<i class="fas fa-envelope"></i> Send Order via Email';
@@ -702,26 +719,27 @@ localStorage.setItem("localShopPins", JSON.stringify(savedPins));
         }
 
         // --- अपडेटेड फंक्शन: सेव किए हुए सारे PINs स्क्रीन पर दिखाएं ---
-function checkAndDisplayPin() {
-    // मेमोरी से लिस्ट निकालें
-    let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
-    const pinBox = document.getElementById("pin-display-box");
-    const pinValueSpan = document.getElementById("saved-pin-value");
+        function checkAndDisplayPin() {
+            // मेमोरी से लिस्ट निकालें
+            let savedPins = JSON.parse(localStorage.getItem("localShopPins")) || [];
+            const pinBox = document.getElementById("pin-display-box");
+            const pinValueSpan = document.getElementById("saved-pin-value");
 
-    if (savedPins.length > 0) {
-        // लिस्ट के सारे PINs को कॉमा (,) से जोड़ कर दिखाएं (जैसे: 4829, 1256)
-        pinValueSpan.innerText = savedPins.join(", ");
-        pinBox.style.display = "block";
-    } else {
-        pinBox.style.display = "none";
-    }
-}
+            if (savedPins.length > 0) {
+                // लिस्ट के सारे PINs को कॉमा (,) से जोड़ कर दिखाएं (जैसे: 4829, 1256)
+                pinValueSpan.innerText = savedPins.join(", ");
+                pinBox.style.display = "block";
+            } else {
+                pinBox.style.display = "none";
+            }
+        }
 
-window.addEventListener('load', function() {
-    if (typeof checkAndDisplayPin === "function") {
-        checkAndDisplayPin();
-    }
-});
+        window.addEventListener('load', function () {
+            if (typeof checkAndDisplayPin === "function") {
+                checkAndDisplayPin();
+            }
+        });
     </script>
 </body>
+
 </html>
