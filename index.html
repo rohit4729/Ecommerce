@@ -655,7 +655,7 @@
             localStorage.setItem("localShopPins", JSON.stringify(savedPins));
 
             // Format cart into readable text for the email
-            let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\n\nItems Ordered:\n`;
+            let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\nDelivery PIN: ${deliveryPin}\n\nItems Ordered:\n`;
             let total = 0;
 
             cart.forEach(item => {
