@@ -360,16 +360,19 @@
 </head>
 
 <body>
-<!-- Top Right Action Buttons (Cancel Order + Help & Support) -->
-    <div style="position: absolute; top: 20px; right: 20px; z-index: 1000; display: flex; gap: 15px; align-items: center;">
-        
+    <!-- Top Right Action Buttons (Cancel Order + Help & Support) -->
+    <div
+        style="position: absolute; top: 20px; right: 20px; z-index: 1000; display: flex; gap: 15px; align-items: center;">
+
         <!-- Cancel Order Button -->
-        <a href="track-order.html" style="background-color: white; color: #ef4444; border: 2px solid #ef4444; padding: 8px 18px; text-decoration: none; border-radius: 8px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;">
+        <a href="track-order.html"
+            style="background-color: white; color: #ef4444; border: 2px solid #ef4444; padding: 8px 18px; text-decoration: none; border-radius: 8px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;">
             <i class="fas fa-times-circle"></i> Cancel Order
         </a>
 
         <!-- Help & Support Button -->
-        <a href="contact.html" style="background-color: #3b82f6; color: white; border: 2px solid #3b82f6; padding: 8px 18px; text-decoration: none; border-radius: 8px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;">
+        <a href="contact.html"
+            style="background-color: #3b82f6; color: white; border: 2px solid #3b82f6; padding: 8px 18px; text-decoration: none; border-radius: 8px; font-weight: bold; font-family: Arial, sans-serif; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: 0.3s;">
             <i class="fas fa-headset"></i> Help & Support
         </a>
 
@@ -434,6 +437,42 @@
                 <input type="text" id="customer-name" placeholder="Your Full Name" required>
                 <input type="tel" id="customer-phone" placeholder="Your Phone Number" required>
                 <input type="text" id="customer-address" placeholder="Your address" required>
+                <label style="font-weight: bold; color: #1f2937;">Select Delivery Area:</label>
+                <select id="delivery-area" onchange="updateTotalAmount()" required
+                    style="width: 100%; padding: 12px; margin-top: 5px; margin-bottom: 15px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 1rem; outline: none;">
+                    <option value="0">Select your area...</option>
+
+                    <!-- 1 KM : 10 Rs -->
+                    <option value="10">Mathuranagar Bajarwadi (10 Rs)</option>
+                    <option value="10">Mathuranagar (10 Rs)</option>
+                    <option value="10">Gomani (10 Rs)</option>
+
+                    <!-- 2 KM : 15 Rs -->
+                    <option value="15">Harinagar(15 Rs)</option>
+
+                    <!-- 3 KM : 20 Rs -->
+                    <option value="20">Govindpur (20 Rs)</option>
+                    <option value="20">Ambatpalli (20 Rs)</option>
+                    <option value="20">Gomani tola (20 Rs)</option>
+                    <option value="20">Bhimnagar (20 Rs)</option>
+
+                    <!-- 4 KM : 25 Rs -->
+                    <option value="25">Shrirampur or 212 (25 Rs)</option>
+                    <option value="25">Chichela (25 Rs)</option>
+                    <option value="25">Kodegaon (25 Rs)</option>
+                    <option value="25">Navegaon (25 Rs)</option>
+                    <option value="25">Mukhadi tola (25 Rs)</option>
+                    <!-- 5 KM : 30 Rs -->
+                    <option value="30">Kistapur (30 Rs)</option>
+                    <option value="30">Mukhadi (30 Rs)</option>
+                </select>
+
+                <div style="font-weight: bold; margin-bottom: 10px; color: #4b5563;">
+                    Delivery Charge: ₹<span id="delivery-charge-display">0</span>
+                </div>
+                <div style="font-weight: bold; font-size: 1.2rem; color: #10b981; margin-bottom: 20px;">
+                    Final Total: ₹<span id="final-total-display">0</span>
+                </div>
                 <button type="submit" class="send-order-btn" id="submit-btn">
                     <i class="fas fa-envelope"></i> Send Order via Email
                 </button>
@@ -670,13 +709,28 @@
 
             // Format cart into readable text for the email
             let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\nDelivery PIN: ${deliveryPin}\n\nItems Ordered:\n`;
-            let total = 0;
+
 
             cart.forEach(item => {
                 orderText += `- ${item.name} | Qty: ${item.quantity} | Price: ₹${item.price * item.quantity}\n`;
-                total += (item.price * item.quantity);
+
             });
-            orderText += `\nGRAND TOTAL: ₹${total}`;
+            // 1. Dropdown se selected area ka naam nikalna
+            let areaDropdown = document.getElementById('delivery-area');
+            let selectedArea = "Not Selected"; // Default agar kuch select na kiya ho
+            if (areaDropdown.selectedIndex > 0) {
+                selectedArea = areaDropdown.options[areaDropdown.selectedIndex].text;
+            }
+
+            // 2. Screen se delivery charge aur final total nikalna
+            let deliveryChargeAmount = document.getElementById('delivery-charge-display').innerText;
+            let emailFinalAmount = document.getElementById('final-total-display').innerText;
+
+            // 3. In sab details ko email (orderText) mein add karna
+            orderText += `\n\n--- Delivery Details ---`;
+            orderText += `\nArea: ${selectedArea}`;
+            orderText += `\nCharge: ₹${deliveryChargeAmount}`;
+            orderText += `\n\nGRAND TOTAL: ₹${emailFinalAmount}`;
 
             // Prepare parameters for EmailJS Template
             const templateParams = {
@@ -753,6 +807,27 @@
                 checkAndDisplayPin();
             }
         });
+        function updateTotalAmount() {
+            // 1. Delivery charge nikalo
+            const areaDropdown = document.getElementById('delivery-area');
+            const deliveryCharge = parseInt(areaDropdown.value) || 0;
+
+            // Screen par delivery charge update karo
+            document.getElementById('delivery-charge-display').innerText = deliveryCharge;
+
+            // 2. Cart ka asli total yahan khud calculate karo (Scope issue fix)
+            let currentCartTotal = 0;
+            cart.forEach(item => {
+                currentCartTotal += item.price * item.quantity;
+            });
+
+            // 3. Final Total nikalo (Cart Total + Delivery Charge)
+            const finalTotal = currentCartTotal + deliveryCharge;
+
+            // Screen par final total update karo
+            document.getElementById('final-total-display').innerText = finalTotal;
+        }
+
     </script>
 </body>
 
