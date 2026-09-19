@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Track or Cancel Order</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f9fafb; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .container { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); width: 90%; max-width: 400px; text-align: center; }
+        h2 { color: #1f2937; margin-bottom: 20px; }
+        input { width: 80%; padding: 12px; margin-bottom: 15px; border: 2px solid #d1d5db; border-radius: 8px; font-size: 1rem; outline: none; }
+        input:focus { border-color: #ef4444; }
+        .pin-input { font-size: 1.2rem; letter-spacing: 3px; text-align: center; }
+        button { background-color: #ef4444; color: white; border: none; padding: 12px 20px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; transition: 0.3s; }
+        button:hover { background-color: #dc2626; }
+        .back-btn { display: inline-block; margin-top: 20px; color: #3b82f6; text-decoration: none; }
+        #msg { margin-top: 15px; font-weight: bold; }
+        .error { color: #ef4444; }
+        .success { color: #10b981; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h2><i class="fas fa-box-open"></i> Manage Order</h2>
+        <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 20px;">Enter your details to track or cancel your order.</p>
+
+        <input type="tel" id="customer-phone" placeholder="Enter Phone Number">
+        <input type="number" id="customer-pin" class="pin-input" placeholder="4-Digit PIN" maxlength="4">
+        
+        <button id="cancel-btn" onclick="cancelOrder()"><i class="fas fa-times-circle"></i> Cancel My Order</button>
+        
+        <div id="msg"></div>
+
+        <a href="index.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+
+    <script>
+        // 🚨 IMPORTANT: यहाँ अपना असली Firebase Config डालें 🚨
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
+        function cancelOrder() {
+            const phone = document.getElementById('customer-phone').value;
+            const pin = parseInt(document.getElementById('customer-pin').value);
+            const msgBox = document.getElementById('msg');
+            const btn = document.getElementById('cancel-btn');
+
+            if (!phone || !pin) {
+                msgBox.innerHTML = '<span class="error">Please enter both Phone and PIN.</span>';
+                return;
+            }
+
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Checking...';
+            btn.disabled = true;
+
+            // डेटाबेस में आर्डर ढूँढें
+            db.collection("orders")
+              .where("customerPhone", "==", phone)
+              .where("secretPin", "==", pin)
+              .get()
+            .then((querySnapshot) => {
+                if (querySnapshot.empty) {
+                    msgBox.innerHTML = '<span class="error">No order found with this Phone & PIN.</span>';
+                    resetBtn(btn);
+                    return;
+                }
+
+                querySnapshot.forEach((doc) => {
+                    const orderData = doc.data();
+
+                    // चेक करें कि आर्डर पहले से डिलीवर या कैंसिल तो नहीं हो गया
+                    if (orderData.status === "Delivered") {
+                        msgBox.innerHTML = '<span class="warning">Cannot cancel! Order is already Delivered.</span>';
+                        resetBtn(btn);
+                    } else if (orderData.status === "Cancelled") {
+                        msgBox.innerHTML = '<span class="warning">Order is already Cancelled.</span>';
+                        resetBtn(btn);
+                    } else {
+                        // अगर पेंडिंग है, तो कैंसिल करें
+                        db.collection("orders").doc(doc.id).update({
+                            status: "Cancelled",
+                            cancelTime: new Date().toLocaleString()
+                        })
+                        .then(() => {
+                            msgBox.innerHTML = '<span class="success"><i class="fas fa-check"></i> Order Cancelled Successfully!</span>';
+                            // ऑप्शनल: यहाँ से EmailJS का कोड भी लगा सकते हैं ताकि ओनर को ईमेल चला जाए
+                            resetBtn(btn);
+                        });
+                    }
+                });
+            })
+            .catch((error) => {
+                msgBox.innerHTML = '<span class="error">Error connecting to server.</span>';
+                resetBtn(btn);
+            });
+        }
+
+        function resetBtn(btn) {
+            btn.innerHTML = '<i class="fas fa-times-circle"></i> Cancel My Order';
+            btn.disabled = false;
+        }
+    </script>
+</body>
+</html>
