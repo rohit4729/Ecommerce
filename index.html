@@ -738,10 +738,15 @@
 
             // Prepare parameters for EmailJS Template
             const templateParams = {
-                to_email: 'rohitmandal214339@gmail.com', // Your email
+                // --- आपके (Shop Owner) ईमेल के लिए पुराने वेरिएबल्स ---
+                to_email: 'rohitmandal214339@gmail.com',
+                customer_name: name,
+                customer_phone: phone,
+                order_details: orderText,
+
+                // --- कस्टमर की रसीद (Auto-Reply) के लिए नए वेरिएबल्स ---
                 customer_email: customerEmail,
                 name: name,
-                phone: phone,
                 orderText: orderText,
                 deliveryPin: deliveryPin
             };
