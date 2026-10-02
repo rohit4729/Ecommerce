@@ -376,8 +376,9 @@
             <i class="fas fa-headset"></i> Help & Support
         </a>
 
-        <a href="admin.html" target="_blank" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
-        🫅Manager Dashboard
+        <a href="admin.html" target="_blank"
+            style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+            🫅Manager Dashboard
         </a>
     </div>
 
@@ -715,11 +716,16 @@
             // Format cart into readable text for the email
             let orderText = `New Order from ${name} \nPhone: ${phone}\nAddress: ${address}\nDelivery PIN: ${deliveryPin}\n\nItems Ordered:\n`;
 
+            let productsTotal = 0;
 
             cart.forEach(item => {
-                orderText += `- ${item.name} | Qty: ${item.quantity} | Price: ₹${item.price * item.quantity}\n`;
-
+                let itemTotal = item.price * item.quantity;
+                productsTotal += itemTotal; // डेटाबेस के लिए टोटल कैलकुलेट कर रहा है
+                orderText += `- ${item.name} | Qty: ${item.quantity} | Price: ₹${itemTotal}\n`; // ईमेल के लिए टेक्स्ट बना रहा है (तुम्हारा पुराना काम)
             });
+            // cart.forEach(item => {
+            //     orderText += `- ${item.name} | Qty: ${item.quantity} | Price: ₹${item.price * item.quantity}\n`;
+            // });
             // 1. Dropdown se selected area ka naam nikalna
             let areaDropdown = document.getElementById('delivery-area');
             let selectedArea = "Not Selected"; // Default agar kuch select na kiya ho
@@ -789,7 +795,8 @@
                         orderDate: new Date().toLocaleString(),
                         deliveryArea: selectedArea,
                         deliveryCharge: deliveryChargeAmount,
-                        finalTotal: emailFinalAmount
+                        finalTotal: emailFinalAmount,
+                        productsTotal: productsTotal
                     });
                     cart = []; // Clear Cart
                     updateCartUI();
