@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Dashboard</title>
+    
+    <!-- Using Firebase Compat v10 (Same as index.html) -->
+    <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.3.0/firebase-firestore-compat.js"></script>
+
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        #login-section { max-width: 400px; margin: 100px auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1); text-align: center; }
+        #login-section input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        #login-section button { width: 95%; padding: 10px; background-color: #007bff; color: white; border: none; border-radius: 4px; font-weight: bold; cursor: pointer; }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background: #fff; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #333; color: white; }
+        .btn { padding: 5px 10px; margin: 2px; cursor: pointer; border: none; border-radius: 3px; color: white; }
+        .btn-slip { background-color: #28a745; }
+        .btn-report { background-color: #17a2b8; }
+        .btn-logout { background-color: #dc3545; padding: 8px 15px; color: white; text-decoration: none; border: none; border-radius: 5px; cursor: pointer; }
+        
+        /* Print karte waqt Secret PIN hide karne ke liye */
+        @media print {
+            .no-print { display: none !important; }
+            .secret-pin { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-section">
+        <h2>Manager Login</h2>
+        <input type="email" id="manager-email" placeholder="Enter Manager Email"><br>
+        <input type="password" id="manager-password" placeholder="Enter Password"><br>
+        <button onclick="loginManager()">Login</button>
+        <p id="login-error" style="color: red; display: none;"></p>
+    </div>
+
+    <div id="dashboard-section" style="display: none;">
+        <h2 class="no-print">Manager Dashboard</h2>
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;" class="no-print">
+            <button class="btn btn-logout" onclick="logoutManager()">Logout</button>
+            <button class="btn btn-report" onclick="window.print()">Print Sales Report (For Owner)</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Customer Name</th>
+                    <th>Phone</th>
+                    <th>Address</th>
+                    <th>Order Details</th>
+                    <th class="secret-pin">Secret PIN</th>
+                    <th class="no-print">Action</th>
+                </tr>
+            </thead>
+            <tbody id="order-list"></tbody>
+        </table>
+    </div>
+
+    <script>
+       const firebaseConfig = {
+            apiKey: "AIzaSyDZqKpIPtARoX6xLZtbTRVRWn-GblEyWKg",
+            authDomain: "thelocalshop-db-7de5b.firebaseapp.com",
+            projectId: "thelocalshop-db-7de5b",
+            storageBucket: "thelocalshop-db-7de5b.firebasestorage.app",
+            messagingSenderId: "296983976077",
+            appId: "1:296983976077:web:94a0b6c53e9f9082ef2ac4"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+        let globalOrders = {}; 
+
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('dashboard-section').style.display = 'block';
+                loadOrders();
+            } else {
+                document.getElementById('login-section').style.display = 'block';
+                document.getElementById('dashboard-section').style.display = 'none';
+            }
+        });
+
+        function loginManager() {
+            const email = document.getElementById('manager-email').value;
+            const password = document.getElementById('manager-password').value;
+            const errorMsg = document.getElementById('login-error');
+            auth.signInWithEmailAndPassword(email, password)
+                .then(() => { errorMsg.style.display = 'none'; })
+                .catch((error) => {
+                    errorMsg.style.display = 'block';
+                    errorMsg.innerText = error.message;
+                });
+        }
+
+        function logoutManager() {
+            auth.signOut().then(() => {
+                document.getElementById('manager-email').value = '';
+                document.getElementById('manager-password').value = '';
+            });
+        }
+
+        function loadOrders() {
+            const orderList = document.getElementById('order-list');
+            
+            db.collection("orders").orderBy("orderDate", "desc").onSnapshot((snapshot) => {
+                orderList.innerHTML = ''; 
+                globalOrders = {};
+                
+                if(!snapshot.empty) {
+                    snapshot.forEach((doc) => {
+                        let order = doc.data();
+                        globalOrders[doc.id] = order;
+                        
+                        let orderItemsText = "";
+                        if (order.orderItems && Array.isArray(order.orderItems)) {
+                            order.orderItems.forEach(item => {
+                                orderItemsText += `- ${item.name} | Qty: ${item.quantity} | ₹${item.price * item.quantity}\n`;
+                            });
+                        }
+
+                        let tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${order.orderDate || 'N/A'}</td>
+                            <td>${order.customerName || 'N/A'}</td>
+                            <td>${order.customerPhone || 'N/A'}</td>
+                            <td>${order.deliveryAddress || 'N/A'}</td>
+                            <td><pre style="font-family: inherit; margin:0;">${orderItemsText}</pre></td>
+                            <td class="secret-pin"><strong>${order.secretPin || 'N/A'}</strong></td>
+                            <td class="no-print">
+                                <button class="btn btn-slip" onclick="printDeliverySlip('${doc.id}')">Print Slip</button>
+                            </td>
+                        `;
+                        orderList.appendChild(tr);
+                    });
+                } else {
+                    orderList.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found!</td></tr>';
+                }
+            });
+        }
+        function printDeliverySlip(orderId) {
+            let order = globalOrders[orderId];
+            if(!order) return;
+            
+            let orderItemsText = "";
+            if (order.orderItems && Array.isArray(order.orderItems)) {
+                order.orderItems.forEach(item => {
+                    orderItemsText += `- ${item.name} | Qty: ${item.quantity} | ₹${item.price * item.quantity}\n`;
+                });
+            }
+
+            let printWin = window.open('', '_blank', 'width=400,height=600');
+            
+            let htmlContent = "<html><head><title>Delivery Slip</title>";
+            htmlContent += "<style>body{font-family:Arial,sans-serif;padding:10px;} .slip{border:2px dashed #000;padding:15px;} h3{text-align:center;border-bottom:1px solid #000;padding-bottom:5px;} pre{white-space:pre-wrap;font-family:inherit;}</style>";
+            // Live Server को कंफ्यूज करने के लिए head और body टैग्स को तोड़ दिया है
+            htmlContent += "</" + "head><" + "body onload='window.print(); setTimeout(function(){window.close();}, 500);'>";
+            htmlContent += "<div class='slip'><h3>The Local Shop<br><small>Delivery Slip</small></h3>";
+            htmlContent += "<p><strong>Customer:</strong> " + (order.customerName || '') + "</p>";
+            htmlContent += "<p><strong>Phone:</strong> " + (order.customerPhone || '') + "</p>";
+            htmlContent += "<p><strong>Address:</strong> " + (order.deliveryAddress || '') + "</p><hr>";
+            htmlContent += "<p><strong>Order Details:</strong></p><pre>" + orderItemsText + "</pre><hr>";
+
+            htmlContent += "<div class='totals'>";
+            if (order.deliveryArea && order.deliveryArea !== "Not Selected") {
+                htmlContent += "<p style='margin: 3px 0;'><strong>Delivery Area:</strong> " + order.deliveryArea + "</p>";
+                htmlContent += "<p style='margin: 3px 0;'><strong>Delivery Charge:</strong> ₹" + (order.deliveryCharge || '0') + "</p>";
+            }
+            let grandTotal = order.finalTotal || order.finalTotalAmount ;
+
+            if (grandTotal ) {
+                 htmlContent += "<h4 style='margin: 5px 0;'>GRAND TOTAL: ₹" + grandTotal + "</h4>";
+            }
+            htmlContent += "</div><hr>";
+
+            htmlContent += "<p style='text-align:center; font-size:12px;'>Thank you for shopping with us!</p>";
+            // Live server injection रोकने के लिए body और html टैग्स को तोड़ दिया है
+            htmlContent += "</div></" + "body></" + "html>";
+
+            printWin.document.write(htmlContent);
+            printWin.document.close();
+        }
+    </script>
+</body>
+</html>

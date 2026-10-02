@@ -376,7 +376,11 @@
             <i class="fas fa-headset"></i> Help & Support
         </a>
 
+        <a href="admin.html" target="_blank" style="padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">
+        🫅Manager Dashboard
+        </a>
     </div>
+
 
     <!-- Hero Section -->
     <header class="hero">
@@ -782,7 +786,10 @@
                         deliveryAddress: address,
                         secretPin: deliveryPin,
                         orderItems: cart,
-                        orderDate: new Date().toLocaleString()
+                        orderDate: new Date().toLocaleString(),
+                        deliveryArea: selectedArea,
+                        deliveryCharge: deliveryChargeAmount,
+                        finalTotal: emailFinalAmount
                     });
                     cart = []; // Clear Cart
                     updateCartUI();
