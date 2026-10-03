@@ -122,9 +122,33 @@
 
     <div id="dashboard-section" style="display: none;">
         <h2 class="no-print">Manager Dashboard</h2>
-        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;" class="no-print">
-            <button class="btn btn-logout" onclick="logoutManager()">Logout</button>
-            <button class="btn btn-report" onclick="window.print()">Print Sales Report (For Owner)</button>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"
+            class="no-print">
+            <div>
+                <button class="btn btn-logout" onclick="logoutManager()">Logout</button>
+                <button class="btn btn-report" onclick="window.print()">Print Sales Report</button>
+            </div>
+            <div style="display: flex; gap: 15px;">
+                <!-- Area Filter -->
+                <div>
+                    <label for="areaFilter" style="font-weight: bold; margin-right: 5px;">Area:</label>
+                    <select id="areaFilter" onchange="filterOrders()"
+                        style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; cursor: pointer;">
+                        <option value="all">All Areas</option>
+                    </select>
+                </div>
+                <!-- Status Filter -->
+                <div>
+                    <label for="statusFilter" style="font-weight: bold; margin-right: 5px;">Status:</label>
+                    <select id="statusFilter" onchange="filterOrders()"
+                        style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; cursor: pointer;">
+                        <option value="all">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="Delivered">Delivered</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            </div>
         </div>
         <table>
             <thead>
@@ -137,7 +161,7 @@
                     <th>Delivery Area</th>
                     <th>status</th>
                     <th class="secret-pin">Pruducts Total 💰</th>
-                    <th>Products Total</th>
+                    <!-- <th>Products Total</th> -->
                     <th class="no-print">Action</th>
 
                 </tr>
@@ -196,15 +220,26 @@
 
         function loadOrders() {
             const orderList = document.getElementById('order-list');
-
+            const areaFilter = document.getElementById("areaFilter"); // ड्रॉपडाउन एलिमेंट को पहले ले लें
+            
             db.collection("orders").orderBy("orderDate", "desc").onSnapshot((snapshot) => {
-                orderList.innerHTML = '';
+                orderList.innerHTML = ''; 
                 globalOrders = {};
-
-                if (!snapshot.empty) {
+                let uniqueAreas = new Set(); // यूनीक एरिया के लिए Set
+                
+                // करंट सेलेक्टेड वैल्यू को सेव कर लें ताकि रीफ्रेश होने पर वही रहे
+                let selectedArea = areaFilter.value;
+                
+                if(!snapshot.empty) {
                     snapshot.forEach((doc) => {
                         let order = doc.data();
                         globalOrders[doc.id] = order;
+                        
+                        // डिलीवरी एरिया को Set में ऐड करना
+                        let deliveryArea = order.deliveryArea ? order.deliveryArea.trim() : "";
+                        if (deliveryArea && deliveryArea !== "Not Selected") {
+                            uniqueAreas.add(deliveryArea);
+                        }
 
                         let orderItemsText = "";
                         if (order.orderItems && Array.isArray(order.orderItems)) {
@@ -213,10 +248,7 @@
                             });
                         }
 
-
-                        // सीधा डेटाबेस से प्रोडक्ट्स का टोटल ले रहे हैं
-                        let productsTotal = order.productsTotal ; // अगर पुराना आर्डर है तो 0 दिखेगा
-
+                        let productsTotal = order.productsTotal;
                         if (!productsTotal && order.orderItems) {
                             productsTotal = 0;
                             order.orderItems.forEach(item => {
@@ -227,10 +259,7 @@
                         }
 
                         let tr = document.createElement('tr');
-                        // स्टेटस चेक: अगर डेटाबेस में स्टेटस है तो दिखाओ, वरना खाली छोड़ दो
                         let orderStatus = order.status ? order.status : "";
-                        // एरिया चेक: अगर एरिया सेव है तो दिखाओ
-                        let deliveryArea = order.deliveryArea ? order.deliveryArea : "";
 
                         tr.innerHTML = `
                             <td>${order.orderDate || 'N/A'}</td>
@@ -241,15 +270,33 @@
                             <td>${deliveryArea}</td>
                             <td><strong>${orderStatus}</strong></td>
                             <td><strong>₹${productsTotal}</strong></td>
-                            <td class="secret-pin"><strong>${order.secretPin || 'N/A'}</strong></td>
                             <td class="no-print">
                                 <button class="btn btn-slip" onclick="printDeliverySlip('${doc.id}')">Print Slip</button>
                             </td>
                         `;
                         orderList.appendChild(tr);
                     });
+
+                    // लूप के बाहर ड्रॉपडाउन को अपडेट करना
+                    areaFilter.innerHTML = '<option value="all">All Areas</option>';
+                    
+                    // Set में मौजूद हर एरिया को ड्रॉपडाउन में जोड़ना
+                    uniqueAreas.forEach(area => {
+                        let option = document.createElement("option");
+                        option.value = area;
+                        option.innerText = area;
+                        areaFilter.appendChild(option);
+                    });
+                    
+                    // अगर पहले से कोई एरिया चुना हुआ था, तो उसे वापस सेट करना
+                    if (Array.from(areaFilter.options).some(opt => opt.value === selectedArea)) {
+                        areaFilter.value = selectedArea;
+                    }
+
+                    filterOrders(); // टेबल को रेंडर करने के बाद फ़िल्टर अप्लाई करना
+
                 } else {
-                    orderList.innerHTML = '<tr><td colspan="7" style="text-align:center;">No orders found!</td></tr>';
+                    orderList.innerHTML = '<tr><td colspan="9" style="text-align:center;">No orders found!</td></tr>';
                 }
             });
         }
@@ -295,6 +342,39 @@
             printWin.document.write(htmlContent);
             printWin.document.close();
         }
+
+        function filterOrders() {
+            let areaValue = document.getElementById("areaFilter").value;
+            let statusValue = document.getElementById("statusFilter").value;
+            let table = document.getElementById("order-list");
+            let tr = table.getElementsByTagName("tr");
+
+            for (let i = 0; i < tr.length; i++) {
+                // डिलीवरी एरिया इंडेक्स 5 पर है, और स्टेटस इंडेक्स 6 पर है
+                let areaTd = tr[i].getElementsByTagName("td")[5];
+                let statusTd = tr[i].getElementsByTagName("td")[6];
+
+                if (areaTd && statusTd) {
+                    let areaText = areaTd.textContent || areaTd.innerText;
+                    let statusText = statusTd.textContent || statusTd.innerText;
+
+                    // अगर स्टेटस खाली है, तो उसे हम "pending" मानेंगे
+                    let currentStatus = statusText.trim() === "" ? "pending" : statusText.trim();
+
+                    // दोनों कंडीशन चेक करना
+                    let areaMatch = (areaValue === "all" || areaText === areaValue);
+                    let statusMatch = (statusValue === "all" || currentStatus === statusValue);
+
+                    // अगर एरिया और स्टेटस दोनों मैच करते हैं, तभी डेटा दिखाओ
+                    if (areaMatch && statusMatch) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none"; // मैच नहीं हुआ तो छिपा दो
+                    }
+                }
+            }
+        }
+
     </script>
 </body>
 
