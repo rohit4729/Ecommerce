@@ -128,7 +128,13 @@
                 <button class="btn btn-logout" onclick="logoutManager()">Logout</button>
                 <button class="btn btn-report" onclick="window.print()">Print Sales Report</button>
             </div>
-            <div style="display: flex; gap: 15px;">
+            <div style="display: flex; gap: 15px; align-items: center;">
+
+                <!-- Date Filter -->
+                <div>
+                    <label for="dateFilter" style="font-weight: bold; margin-right: 5px;">Date:</label>
+                    <input type="text" id="dateFilter" onkeyup="filterOrders()" placeholder="e.g. 9/19/2026" style="padding: 8px; border-radius: 5px; border: 1px solid #ccc; outline: none; width: 130px;">
+                </div>
                 <!-- Area Filter -->
                 <div>
                     <label for="areaFilter" style="font-weight: bold; margin-right: 5px;">Area:</label>
@@ -343,35 +349,40 @@
             printWin.document.close();
         }
 
-        function filterOrders() {
+       function filterOrders() {
             let areaValue = document.getElementById("areaFilter").value;
             let statusValue = document.getElementById("statusFilter").value;
+            // डेट वाले इनपुट की वैल्यू लेना (सर्च के लिए lowercase में कन्वर्ट करके)
+            let dateValue = document.getElementById("dateFilter").value.trim().toLowerCase();
+            
             let table = document.getElementById("order-list");
             let tr = table.getElementsByTagName("tr");
 
             for (let i = 0; i < tr.length; i++) {
-                // डिलीवरी एरिया इंडेक्स 5 पर है, और स्टेटस इंडेक्स 6 पर है
-                let areaTd = tr[i].getElementsByTagName("td")[5];
-                let statusTd = tr[i].getElementsByTagName("td")[6];
+                let dateTd = tr[i].getElementsByTagName("td")[0]; // डेट पहले कॉलम (index 0) में है
+                let areaTd = tr[i].getElementsByTagName("td")[5]; 
+                let statusTd = tr[i].getElementsByTagName("td")[6]; 
 
-                if (areaTd && statusTd) {
+                if (areaTd && statusTd && dateTd) {
+                    let dateText = dateTd.textContent || dateTd.innerText;
                     let areaText = areaTd.textContent || areaTd.innerText;
                     let statusText = statusTd.textContent || statusTd.innerText;
-
-                    // अगर स्टेटस खाली है, तो उसे हम "pending" मानेंगे
+                    
                     let currentStatus = statusText.trim() === "" ? "pending" : statusText.trim();
 
-                    // दोनों कंडीशन चेक करना
+                    // कंडीशन चेक करना
                     let areaMatch = (areaValue === "all" || areaText === areaValue);
                     let statusMatch = (statusValue === "all" || currentStatus === statusValue);
+                    // चेक करना कि क्या टाइप की गई डेट टेबल की डेट के अंदर मौजूद है (includes)
+                    let dateMatch = (dateValue === "" || dateText.toLowerCase().includes(dateValue));
 
-                    // अगर एरिया और स्टेटस दोनों मैच करते हैं, तभी डेटा दिखाओ
-                    if (areaMatch && statusMatch) {
-                        tr[i].style.display = "";
+                    // अगर तीनों शर्तें पूरी होती हैं, तभी लाइन दिखाओ
+                    if (areaMatch && statusMatch && dateMatch) {
+                        tr[i].style.display = ""; 
                     } else {
-                        tr[i].style.display = "none"; // मैच नहीं हुआ तो छिपा दो
+                        tr[i].style.display = "none"; 
                     }
-                }
+                }       
             }
         }
 
